@@ -53,7 +53,7 @@ root.title("Calculator")
 root.geometry("400x600")
 root.configure(bg="#202124")
 root.resizable(False, False)
-# root.iconbitmap('icon1.ico')
+root.iconbitmap('images/icon1.ico')
 
 # Entry widget for user input
 entry = tk.Entry(
@@ -70,33 +70,49 @@ entry.place(x=20, y=20, width=360, height=70)
 
 
 # Function to create circular buttons
-def create_circle_button(parent, x, y, text, command, bg_color="#3C4043", fg_color="#FFFFFF"):
+def create_circle_button(parent, x, y, text, command, bg_color="#3C4043", fg_color="#FFFFFF", image=None):
     canvas = tk.Canvas(parent, width=100, height=100, bg="#202124", highlightthickness=0)
     canvas.place(x=x, y=y)
 
     circle = canvas.create_oval(10, 10, 90, 90, fill=bg_color, outline="")
 
-    label = canvas.create_text(50, 50, text=text, fill=fg_color, font=("Roboto", 22, "bold"))
+    if image:
+        img = canvas.create_image(50, 50, image=image)
+    else:
+        label = canvas.create_text(50, 50, text=text, fill=fg_color, font=("Roboto", 22, "bold"))
+
 
     def on_press(event):
-        canvas.itemconfig(circle, fill="#545454")
-        canvas.move(label, 1, 1)
         canvas.move(circle, 1, 1)
+        if image:
+            canvas.move(img, 1, 1)
+        else:
+            canvas.move(label, 1, 1)
+            canvas.itemconfig(circle, fill="#545454")
 
     def on_release(event):
         canvas.itemconfig(circle, fill=bg_color)
-        canvas.move(label, -1, -1)
         canvas.move(circle, -1, -1)
+        if image:
+            canvas.move(img, -1, -1)
+        else:
+            canvas.move(label, -1, -1)
         command()
 
 
     canvas.tag_bind(circle, "<ButtonPress-1>", on_press)
-    canvas.tag_bind(label, "<ButtonPress-1>", on_press)
+    if image:
+        canvas.tag_bind(img, "<ButtonPress-1>", on_press)
+        canvas.tag_bind(img, "<ButtonRelease-1>", on_release)
+    else:
+        canvas.tag_bind(label, "<ButtonPress-1>", on_press)
+        canvas.tag_bind(label, "<ButtonRelease-1>", on_release)
     canvas.tag_bind(circle, "<ButtonRelease-1>", on_release)
-    canvas.tag_bind(label, "<ButtonRelease-1>", on_release)
 
     return canvas
 
+
+backspace_img = tk.PhotoImage(file='images/backspace.png')
 
 # Button layout
 buttons = [
@@ -117,15 +133,26 @@ y_offset = 90
 for i, (text, color) in enumerate(buttons):
     x = x_start + (i % 4) * x_offset
     y = y_start + (i // 4) * y_offset
-    create_circle_button(
-        root,
-        x,
-        y,
-        text,
-        lambda t=text: click(t),
-        bg_color=color,
-        fg_color="#FFFFFF"
-    )
+    if text == '<--':
+        create_circle_button(
+            root,
+            x,
+            y,
+            None,
+            lambda: click('<--'),
+            bg_color=color,
+            image=backspace_img
+        )
+    else:
+        create_circle_button(
+            root,
+            x,
+            y,
+            text,
+            lambda t=text: click(t),
+            bg_color=color,
+            fg_color="#FFFFFF"
+        )
 
 
 # Run the application
