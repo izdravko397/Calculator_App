@@ -16,7 +16,7 @@ A simple and visually appealing calculator application built using Python and Tk
 ---
 
 ### Main Interface
-![Calculator Screenshot](assets/calculator.png)
+![Calculator Screenshot](assets/calculator.PNG)
 
 ---
 
